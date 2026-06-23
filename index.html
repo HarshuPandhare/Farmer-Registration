@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Farmer Management System — Login to manage farmer records, crop data, and agricultural analytics.">
+  <title>Farmer Portal — Login</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>">
+</head>
+<body>
+  <div class="bg-animated"></div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner spinner-lg"></div>
+    <span class="loading-text">Signing in…</span>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <div class="login-page">
+    <div class="login-container glass-card">
+      <!-- Left Hero -->
+      <div class="login-hero">
+        <div class="login-hero-content">
+          <h1>🌾 Farmer Portal</h1>
+          <p>A complete management system for modern agriculture. Track crops, monitor growth, and analyze yields — all in one place.</p>
+          <div class="hero-features">
+            <div class="hero-feature">
+              <span class="feature-dot"></span>
+              <span>Register and manage farmer profiles</span>
+            </div>
+            <div class="hero-feature">
+              <span class="feature-dot"></span>
+              <span>Track crop growth &amp; yield results</span>
+            </div>
+            <div class="hero-feature">
+              <span class="feature-dot"></span>
+              <span>Upload photos &amp; documents</span>
+            </div>
+            <div class="hero-feature">
+              <span class="feature-dot"></span>
+              <span>Admin analytics dashboard</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Form -->
+      <div class="login-form-section">
+        <h2>Welcome Back</h2>
+        <p class="subtitle">Sign in to your account</p>
+
+        <!-- Role Toggle -->
+        <div class="role-toggle" id="roleToggle">
+          <button type="button" class="role-toggle-btn active" data-role="farmer" id="roleFarmerBtn">🧑‍🌾 Farmer</button>
+          <button type="button" class="role-toggle-btn" data-role="admin" id="roleAdminBtn">🔐 Admin</button>
+        </div>
+
+        <!-- Login Form -->
+        <form id="loginForm" class="login-form" autocomplete="off">
+          <div class="form-group">
+            <label class="form-label" for="loginId">
+              <span id="loginIdLabel">Farmer ID</span>
+              <span class="required">*</span>
+            </label>
+            <input type="text" class="form-control" id="loginId" placeholder="Enter your Farmer ID" required>
+            <div class="error-message" id="loginIdError">Please enter your ID</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="loginPassword">
+              Password <span class="required">*</span>
+            </label>
+            <input type="password" class="form-control" id="loginPassword" placeholder="Enter your password" required>
+            <div class="error-message" id="loginPasswordError">Please enter your password</div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block btn-lg" id="loginBtn">
+            Sign In
+          </button>
+        </form>
+
+        <div class="login-footer" id="loginFooter">
+          Don't have an account? <a href="register.html">Register as Farmer</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Redirect if already logged in
+      const session = getSession();
+      if (session) {
+        window.location.href = session.role === 'admin' ? 'admin-dashboard.html' : 'farmer-dashboard.html';
+        return;
+      }
+
+      let currentRole = 'farmer';
+
+      // Role toggle
+      document.querySelectorAll('.role-toggle-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.role-toggle-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentRole = btn.dataset.role;
+
+          const label = document.getElementById('loginIdLabel');
+          const input = document.getElementById('loginId');
+          const footer = document.getElementById('loginFooter');
+
+          if (currentRole === 'admin') {
+            label.textContent = 'Username';
+            input.placeholder = 'Enter admin username';
+            footer.style.display = 'none';
+          } else {
+            label.textContent = 'Farmer ID';
+            input.placeholder = 'Enter your Farmer ID';
+            footer.style.display = 'block';
+          }
+        });
+      });
+
+      // Login form submit
+      document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const id = document.getElementById('loginId').value.trim();
+        const password = document.getElementById('loginPassword').value.trim();
+
+        if (!id || !password) {
+          showToast('Please fill in all fields', 'error');
+          return;
+        }
+
+        showLoading(true, 'Signing in…');
+
+        try {
+          const result = await apiCall('login', {
+            id: id,
+            password: password,
+            role: currentRole
+          });
+
+          if (result.success) {
+            saveSession({
+              id: result.data.id,
+              name: result.data.name,
+              role: result.data.role
+            });
+            showToast('Login successful! Redirecting…', 'success');
+            setTimeout(() => {
+              window.location.href = result.data.role === 'admin' ? 'admin-dashboard.html' : 'farmer-dashboard.html';
+            }, 800);
+          } else {
+            showToast(result.message || 'Invalid credentials', 'error');
+          }
+        } catch (err) {
+          showToast('Connection error. Please try again.', 'error');
+        } finally {
+          showLoading(false);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

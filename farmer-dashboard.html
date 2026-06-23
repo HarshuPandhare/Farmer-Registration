@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="View and edit your farmer profile — Farmer Dashboard.">
+  <title>Farmer Portal — My Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>">
+</head>
+
+<body>
+  <div class="bg-animated"></div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner spinner-lg"></div>
+    <span class="loading-text">Loading your profile…</span>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <div class="page-wrapper">
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="navbar-inner">
+        <div class="navbar-brand">
+          <div class="brand-icon">🌾</div>
+          <span>Farmer Portal</span>
+        </div>
+        <div class="navbar-user">
+          <span class="user-name">Welcome, <strong id="navUserName">Farmer</strong></span>
+          <button class="btn btn-outline btn-sm" onclick="logout()">Logout</button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard-content container">
+      <div class="dashboard-header">
+        <h1>My Profile</h1>
+        <p>View and edit your farming information</p>
+      </div>
+
+      <div class="profile-section" id="profileSection">
+        <!-- Profile Card (Left) -->
+        <div class="profile-card" id="profileCard">
+          <div class="profile-photo-placeholder" id="profilePhotoPlaceholder">👤</div>
+          <img class="profile-photo" id="profilePhoto" alt="Farmer photo" style="display:none;">
+          <h3 class="profile-name" id="profileName">—</h3>
+          <p class="profile-id" id="profileIdDisplay"></p>
+          <div class="profile-meta">
+            <div class="profile-meta-item">
+              <span class="meta-label">Mobile</span>
+              <span class="meta-value" id="metaMobile">—</span>
+            </div>
+            <div class="profile-meta-item">
+              <span class="meta-label">Village</span>
+              <span class="meta-value" id="metaVillage">—</span>
+            </div>
+            <div class="profile-meta-item">
+              <span class="meta-label">District</span>
+              <span class="meta-value" id="metaDistrict">—</span>
+            </div>
+            <div class="profile-meta-item">
+              <span class="meta-label">Crops</span>
+              <span class="meta-value" id="metaCrops">—</span>
+            </div>
+            <div class="profile-meta-item">
+              <span class="meta-label">Soil Type</span>
+              <span class="meta-value" id="metaSoil">—</span>
+            </div>
+            <div class="profile-meta-item">
+              <span class="meta-label">Registered</span>
+              <span class="meta-value" id="metaRegDate">—</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Edit Form (Right) -->
+        <div class="profile-edit-form" id="editFormSection">
+          <h2>✏️ Edit Profile</h2>
+
+          <form id="editForm" autocomplete="off">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="editName">Name <span class="required">*</span></label>
+                <input type="text" class="form-control" id="editName" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Farmer ID</label>
+                <input type="text" class="form-control" id="editFarmerId" disabled style="opacity:0.6;">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="editAadhaar">Aadhaar No <span class="required">*</span></label>
+                <input type="text" class="form-control" id="editAadhaar" required maxlength="12">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="editMobile">Mobile No <span class="required">*</span></label>
+                <input type="tel" class="form-control" id="editMobile" required maxlength="10">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Gender <span class="required">*</span></label>
+              <div class="radio-group">
+                <label class="radio-item">
+                  <input type="radio" name="editGender" value="Male" required>
+                  <span>Male</span>
+                </label>
+                <label class="radio-item">
+                  <input type="radio" name="editGender" value="Female">
+                  <span>Female</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Update Farmer Photo</label>
+              <div class="file-upload-wrapper">
+                <div class="file-upload-area">
+                  <span class="upload-icon">📷</span>
+                  <span class="upload-text">Click to <span>change photo</span> (optional)</span>
+                  <input type="file" id="editFarmerPhoto" accept="image/*">
+                </div>
+                <img class="photo-preview" id="editFarmerPhotoPreview" alt="New photo preview">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="editVillage">Village <span class="required">*</span></label>
+                <input type="text" class="form-control" id="editVillage" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="editTahsil">Tahsil <span class="required">*</span></label>
+                <input type="text" class="form-control" id="editTahsil" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="editDistrict">District <span class="required">*</span></label>
+                <input type="text" class="form-control" id="editDistrict" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="editLocation">Location <span class="required">*</span></label>
+                <input type="text" class="form-control" id="editLocation" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Crops Grown <span class="required">*</span></label>
+              <div class="check-group" id="editCropsGroup">
+                <label class="check-item">
+                  <input type="checkbox" name="editCrops" value="Sugarcane">
+                  <span>🌿 Sugarcane</span>
+                </label>
+                <label class="check-item">
+                  <input type="checkbox" name="editCrops" value="Soybean">
+                  <span>🫘 Soybean</span>
+                </label>
+                <label class="check-item">
+                  <input type="checkbox" name="editCrops" value="Pomegranate">
+                  <span>🍎 Pomegranate</span>
+                </label>
+                <label class="check-item">
+                  <input type="checkbox" name="editCrops" value="Maize">
+                  <span>🌽 Maize</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Soil Type <span class="required">*</span></label>
+              <div class="radio-group">
+                <label class="radio-item">
+                  <input type="radio" name="editSoilType" value="Light" required>
+                  <span>Light</span>
+                </label>
+                <label class="radio-item">
+                  <input type="radio" name="editSoilType" value="Medium">
+                  <span>Medium</span>
+                </label>
+                <label class="radio-item">
+                  <input type="radio" name="editSoilType" value="Heavy">
+                  <span>Heavy</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="editDateOfFirstUse">Date of First Use <span
+                    class="required">*</span></label>
+                <input type="date" class="form-control" id="editDateOfFirstUse" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Method of Use <span class="required">*</span></label>
+                <div class="radio-group">
+                  <label class="radio-item">
+                    <input type="radio" name="editMethodOfUse" value="Spray" required>
+                    <span>Spray</span>
+                  </label>
+                  <label class="radio-item">
+                    <input type="radio" name="editMethodOfUse" value="Drenching">
+                    <span>Drenching</span>
+                  </label>
+                  <label class="radio-item">
+                    <input type="radio" name="editMethodOfUse" value="Both">
+                    <span>Both</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Vegetative Growth <span class="required">*</span></label>
+                <div class="radio-group">
+                  <label class="radio-item">
+                    <input type="radio" name="editVegetativeGrowth" value="Increase" required>
+                    <span>Increase</span>
+                  </label>
+                  <label class="radio-item">
+                    <input type="radio" name="editVegetativeGrowth" value="No Response">
+                    <span>No Response</span>
+                  </label>
+                  <label class="radio-item">
+                    <input type="radio" name="editVegetativeGrowth" value="Decrease">
+                    <span>Decrease</span>
+                  </label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Yield Result <span class="required">*</span></label>
+                <div class="radio-group">
+                  <label class="radio-item">
+                    <input type="radio" name="editYieldResult" value="No Result" required>
+                    <span>No Result</span>
+                  </label>
+                  <label class="radio-item">
+                    <input type="radio" name="editYieldResult" value="Increase Yield">
+                    <span>Increase Yield</span>
+                  </label>
+                  <label class="radio-item">
+                    <input type="radio" name="editYieldResult" value="Lower Yield">
+                    <span>Lower Yield</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-actions" style="border-top: none; padding-top: 0;">
+              <div></div>
+              <button type="submit" class="btn btn-primary btn-lg">💾 Save Changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      requireAuth('farmer');
+      setupPhotoPreview('editFarmerPhoto', 'editFarmerPhotoPreview');
+      loadFarmerProfile();
+    });
+
+    async function loadFarmerProfile() {
+      const session = getSession();
+      if (!session) return;
+
+      document.getElementById('navUserName').textContent = session.name || session.id;
+      showLoading(true, 'Loading your profile…');
+
+      try {
+        const result = await apiCall('getFarmer', { farmerId: session.id });
+
+        if (result.success) {
+          populateProfile(result.data);
+        } else {
+          showToast(result.message || 'Failed to load profile', 'error');
+        }
+      } catch (err) {
+        showToast('Connection error', 'error');
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    function populateProfile(data) {
+      // Profile card
+      if (data.farmerPhotoURL) {
+        document.getElementById('profilePhoto').src = fixDriveImageUrl(data.farmerPhotoURL);
+        document.getElementById('profilePhoto').style.display = 'block';
+        document.getElementById('profilePhotoPlaceholder').style.display = 'none';
+      }
+      document.getElementById('profileName').textContent = data.name || '—';
+      document.getElementById('profileIdDisplay').textContent = 'ID: ' + (data.farmerId || '—');
+      document.getElementById('metaMobile').textContent = data.mobileNo || '—';
+      document.getElementById('metaVillage').textContent = data.village || '—';
+      document.getElementById('metaDistrict').textContent = data.district || '—';
+      document.getElementById('metaCrops').textContent = data.cropsGrown || '—';
+      document.getElementById('metaSoil').textContent = data.soilType || '—';
+      document.getElementById('metaRegDate').textContent = data.registrationDate || '—';
+
+      // Edit form
+      document.getElementById('editName').value = data.name || '';
+      document.getElementById('editFarmerId').value = data.farmerId || '';
+      document.getElementById('editAadhaar').value = data.aadhaarNo || '';
+      document.getElementById('editMobile').value = data.mobileNo || '';
+      document.getElementById('editVillage').value = data.village || '';
+      document.getElementById('editTahsil').value = data.tahsil || '';
+      document.getElementById('editDistrict').value = data.district || '';
+      document.getElementById('editLocation').value = data.location || '';
+      if (data.dateOfFirstUse) {
+        // Handle Google Sheets date format (e.g., 2023-10-14T18:30:00.000Z)
+        document.getElementById('editDateOfFirstUse').value = data.dateOfFirstUse.split('T')[0];
+      } else {
+        document.getElementById('editDateOfFirstUse').value = '';
+      }
+
+      // Radio selections
+      setRadio('editGender', data.gender);
+      setRadio('editSoilType', data.soilType);
+      setRadio('editMethodOfUse', data.methodOfUse);
+      setRadio('editVegetativeGrowth', data.vegetativeGrowth);
+      setRadio('editYieldResult', data.yieldResult);
+
+      // Crops checkboxes
+      if (data.cropsGrown) {
+        const crops = data.cropsGrown.split(',').map(c => c.trim());
+        document.querySelectorAll('input[name="editCrops"]').forEach(cb => {
+          cb.checked = crops.includes(cb.value);
+        });
+      }
+    }
+
+    function setRadio(name, value) {
+      if (!value) return;
+      const el = document.querySelector(`input[name="${name}"][value="${value}"]`);
+      if (el) el.checked = true;
+    }
+
+    // Submit edit form
+    document.getElementById('editForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const session = getSession();
+      if (!session) return;
+
+      showLoading(true, 'Saving changes…');
+
+      try {
+        let farmerPhotoBase64 = '';
+        if (document.getElementById('editFarmerPhoto').files.length) {
+          farmerPhotoBase64 = await fileToBase64(document.getElementById('editFarmerPhoto').files[0]);
+        }
+
+        const crops = Array.from(document.querySelectorAll('input[name="editCrops"]:checked')).map(c => c.value);
+
+        const data = {
+          farmerId: session.id,
+          name: document.getElementById('editName').value.trim(),
+          aadhaarNo: document.getElementById('editAadhaar').value.trim(),
+          gender: document.querySelector('input[name="editGender"]:checked')?.value || '',
+          farmerPhoto: farmerPhotoBase64,
+          mobileNo: document.getElementById('editMobile').value.trim(),
+          village: document.getElementById('editVillage').value.trim(),
+          tahsil: document.getElementById('editTahsil').value.trim(),
+          district: document.getElementById('editDistrict').value.trim(),
+          location: document.getElementById('editLocation').value.trim(),
+          cropsGrown: crops.join(', '),
+          soilType: document.querySelector('input[name="editSoilType"]:checked')?.value || '',
+          dateOfFirstUse: document.getElementById('editDateOfFirstUse').value,
+          methodOfUse: document.querySelector('input[name="editMethodOfUse"]:checked')?.value || '',
+          vegetativeGrowth: document.querySelector('input[name="editVegetativeGrowth"]:checked')?.value || '',
+          yieldResult: document.querySelector('input[name="editYieldResult"]:checked')?.value || ''
+        };
+
+        const result = await apiCall('updateFarmer', data);
+
+        if (result.success) {
+          showToast('Profile updated successfully!', 'success');
+          // Update session name
+          saveSession({ ...session, name: data.name });
+          document.getElementById('navUserName').textContent = data.name;
+          loadFarmerProfile(); // Refresh profile card
+        } else {
+          showToast(result.message || 'Update failed', 'error');
+        }
+      } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+      } finally {
+        showLoading(false);
+      }
+    });
+  </script>
+</body>
+
+</html>

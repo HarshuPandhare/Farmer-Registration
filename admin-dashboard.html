@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Admin Dashboard — View all farmers, analytics, and manage records.">
+  <title>Farmer Portal — Admin Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>">
+</head>
+<body>
+  <div class="bg-animated"></div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner spinner-lg"></div>
+    <span class="loading-text">Loading dashboard…</span>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>⚠️ Confirm Delete</h3>
+        <button class="modal-close" onclick="closeModal('deleteModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="confirm-body">
+          <div class="confirm-icon">🗑️</div>
+          <p>Are you sure you want to delete farmer <strong id="deleteTargetName">—</strong>?</p>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 8px;">This action cannot be undone. All data and photos will be permanently removed.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('deleteModal')">Cancel</button>
+        <button class="btn btn-danger" id="confirmDeleteBtn" onclick="confirmDelete()">Delete Farmer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- View/Edit Farmer Modal -->
+  <div class="modal-overlay" id="farmerModal">
+    <div class="modal" style="max-width: 780px;">
+      <div class="modal-header">
+        <h3 id="farmerModalTitle">Farmer Details</h3>
+        <button class="modal-close" onclick="closeModal('farmerModal')">✕</button>
+      </div>
+      <div class="modal-body" id="farmerModalBody">
+        <!-- Populated dynamically -->
+      </div>
+      <div class="modal-footer" id="farmerModalFooter">
+        <button class="btn btn-outline" onclick="closeModal('farmerModal')">Close</button>
+        <button class="btn btn-primary" id="modalSaveBtn" style="display:none;" onclick="saveModalEdit()">💾 Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-wrapper">
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="navbar-inner">
+        <div class="navbar-brand">
+          <div class="brand-icon">🌾</div>
+          <span>Farmer Portal</span>
+        </div>
+        <div class="navbar-user">
+          <span class="user-name">🔐 <strong>Admin</strong></span>
+          <button class="btn btn-outline btn-sm" onclick="logout()">Logout</button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard-content container">
+      <div class="dashboard-header">
+        <h1>Admin Dashboard</h1>
+        <p>Manage farmers, view analytics, and monitor registrations</p>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card">
+          <div class="stat-card-icon">👥</div>
+          <div class="stat-card-value" id="statTotal">0</div>
+          <div class="stat-card-label">Total Farmers</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon">🌾</div>
+          <div class="stat-card-value" id="statCrops">0</div>
+          <div class="stat-card-label">Crop Types Tracked</div>
+          <div class="stat-card-detail" id="statCropsDetail"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon">🏘️</div>
+          <div class="stat-card-value" id="statVillages">0</div>
+          <div class="stat-card-label">Villages Covered</div>
+          <div class="stat-card-detail" id="statVillagesDetail"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon">📍</div>
+          <div class="stat-card-value" id="statDistricts">0</div>
+          <div class="stat-card-label">Districts</div>
+          <div class="stat-card-detail" id="statDistrictsDetail"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon">🆕</div>
+          <div class="stat-card-value" id="statRecent">0</div>
+          <div class="stat-card-label">Recent (7 days)</div>
+        </div>
+      </div>
+
+      <!-- Farmer Table -->
+      <div class="table-section">
+        <div class="table-toolbar">
+          <h3>👨‍🌾 All Farmers</h3>
+          <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search by name, ID, or village…" oninput="filterTable()">
+          </div>
+          <select class="filter-select" id="filterCrop" onchange="filterTable()">
+            <option value="">All Crops</option>
+            <option value="Sugarcane">Sugarcane</option>
+            <option value="Soybean">Soybean</option>
+            <option value="Pomegranate">Pomegranate</option>
+            <option value="Maize">Maize</option>
+          </select>
+          <select class="filter-select" id="filterDistrict" onchange="filterTable()">
+            <option value="">All Districts</option>
+          </select>
+          <select class="filter-select" id="filterSoil" onchange="filterTable()">
+            <option value="">All Soil Types</option>
+            <option value="Light">Light</option>
+            <option value="Medium">Medium</option>
+            <option value="Heavy">Heavy</option>
+          </select>
+        </div>
+
+        <div class="data-table-wrapper">
+          <table class="data-table" id="farmersTable">
+            <thead>
+              <tr>
+                <th>Photo</th>
+                <th>Farmer ID</th>
+                <th>Name</th>
+                <th>Mobile</th>
+                <th>Village</th>
+                <th>District</th>
+                <th>Crops</th>
+                <th>Soil</th>
+                <th>Yield</th>
+                <th>Registered</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="farmersTableBody">
+              <tr>
+                <td colspan="11">
+                  <div class="empty-state">
+                    <div class="spinner spinner-lg" style="margin: 0 auto;"></div>
+                    <p style="margin-top: 16px;">Loading farmers…</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-footer">
+          <span id="tableCount">Showing 0 farmers</span>
+          <span id="tableInfo"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/script.js"></script>
+  <script>
+    let allFarmers = [];
+    let deleteTargetId = null;
+    let editTargetId = null;
+
+    // Safe wrapper in case fixDriveImageUrl is not defined in script.js
+    function safeFixUrl(url) {
+      if (typeof fixDriveImageUrl === 'function') return fixDriveImageUrl(url);
+      return url || '';
+    }
+
+    // Safe ID getter from a farmer object
+    function getFarmerId(f) {
+      return String(f.farmerId || f.farmerID || '');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      requireAuth('admin');
+      loadAllFarmers();
+    });
+
+    async function loadAllFarmers() {
+      showLoading(true, 'Loading dashboard…');
+      try {
+        const result = await apiCall('getAllFarmers', {});
+        if (result.success) {
+          allFarmers = result.data || [];
+          renderStats();
+          renderTable(allFarmers);
+          populateDistrictFilter();
+        } else {
+          showToast(result.message || 'Failed to load farmers', 'error');
+        }
+      } catch (err) {
+        showToast('Connection error', 'error');
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // ---------- Stats ----------
+    function renderStats() {
+      animateCounter('statTotal', allFarmers.length);
+
+      const cropMap = {};
+      allFarmers.forEach(f => {
+        if (f.cropsGrown) {
+          f.cropsGrown.split(',').map(c => c.trim()).forEach(c => {
+            if (c) cropMap[c] = (cropMap[c] || 0) + 1;
+          });
+        }
+      });
+      animateCounter('statCrops', Object.keys(cropMap).length);
+      document.getElementById('statCropsDetail').innerHTML =
+        Object.entries(cropMap).map(([k, v]) => `${k}: <strong>${v}</strong>`).join('<br>');
+
+      const villageMap = {};
+      allFarmers.forEach(f => {
+        if (f.village) villageMap[f.village] = (villageMap[f.village] || 0) + 1;
+      });
+      animateCounter('statVillages', Object.keys(villageMap).length);
+      document.getElementById('statVillagesDetail').innerHTML =
+        Object.entries(villageMap).slice(0, 8).map(([k, v]) => `${k}: <strong>${v}</strong>`).join('<br>');
+
+      const districtMap = {};
+      allFarmers.forEach(f => {
+        if (f.district) districtMap[f.district] = (districtMap[f.district] || 0) + 1;
+      });
+      animateCounter('statDistricts', Object.keys(districtMap).length);
+      document.getElementById('statDistrictsDetail').innerHTML =
+        Object.entries(districtMap).map(([k, v]) => `${k}: <strong>${v}</strong>`).join('<br>');
+
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      const recent = allFarmers.filter(f => {
+        if (!f.registrationDate) return false;
+        return new Date(f.registrationDate) >= oneWeekAgo;
+      });
+      animateCounter('statRecent', recent.length);
+    }
+
+    function animateCounter(elementId, target) {
+      const el = document.getElementById(elementId);
+      const duration = 1200;
+      const startTime = performance.now();
+      function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        el.textContent = Math.floor(eased * target);
+        if (progress < 1) requestAnimationFrame(update);
+        else el.textContent = target;
+      }
+      requestAnimationFrame(update);
+    }
+
+    // ---------- Table ----------
+    function renderTable(farmers) {
+      const tbody = document.getElementById('farmersTableBody');
+
+      if (!farmers.length) {
+        tbody.innerHTML = `
+          <tr><td colspan="11">
+            <div class="empty-state">
+              <div class="empty-icon">📭</div>
+              <p>No farmers found</p>
+            </div>
+          </td></tr>`;
+        document.getElementById('tableCount').textContent = 'Showing 0 farmers';
+        return;
+      }
+
+      tbody.innerHTML = farmers.map(f => {
+        const fid = getFarmerId(f);
+        const fidEsc = escapeHtml(fid);
+        return `
+          <tr>
+            <td>
+              ${f.farmerPhotoURL
+                ? `<img src="${safeFixUrl(f.farmerPhotoURL)}" class="table-avatar" alt="${escapeHtml(f.name)}" onerror="this.outerHTML='<span style=\\'font-size:1.5rem\\'>👤</span>'">`
+                : '<span style="font-size:1.5rem">👤</span>'}
+            </td>
+            <td><strong>${fidEsc}</strong></td>
+            <td>${escapeHtml(f.name)}</td>
+            <td>${escapeHtml(f.mobileNo || '—')}</td>
+            <td>${escapeHtml(f.village || '—')}</td>
+            <td>${escapeHtml(f.district || '—')}</td>
+            <td>${(f.cropsGrown || '').split(',').map(c => `<span class="badge badge-primary">${escapeHtml(c.trim())}</span>`).join(' ')}</td>
+            <td><span class="badge badge-accent">${escapeHtml(f.soilType || '—')}</span></td>
+            <td>${escapeHtml(f.yieldResult || '—')}</td>
+            <td>${escapeHtml(f.registrationDate ? f.registrationDate.split('T')[0] : '—')}</td>
+            <td>
+              <div class="table-actions">
+                <button class="btn-icon" title="View Details" onclick="viewFarmer('${fidEsc}')">👁️</button>
+                <button class="btn-icon" title="Edit" onclick="editFarmer('${fidEsc}')">✏️</button>
+                <button class="btn-icon danger" title="Delete" onclick="deleteFarmer('${fidEsc}', '${escapeAttr(f.name)}')">🗑️</button>
+              </div>
+            </td>
+          </tr>`;
+      }).join('');
+
+      document.getElementById('tableCount').textContent =
+        `Showing ${farmers.length} of ${allFarmers.length} farmers`;
+    }
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function escapeAttr(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    // ---------- Filter ----------
+    function filterTable() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const crop = document.getElementById('filterCrop').value;
+      const district = document.getElementById('filterDistrict').value;
+      const soil = document.getElementById('filterSoil').value;
+
+      const filtered = allFarmers.filter(f => {
+        const matchSearch = !search ||
+          (f.name || '').toLowerCase().includes(search) ||
+          getFarmerId(f).toLowerCase().includes(search) ||
+          (f.village || '').toLowerCase().includes(search) ||
+          (f.mobileNo || '').toLowerCase().includes(search);
+
+        const matchCrop = !crop || (f.cropsGrown || '').includes(crop);
+        const matchDistrict = !district || f.district === district;
+        const matchSoil = !soil || f.soilType === soil;
+
+        return matchSearch && matchCrop && matchDistrict && matchSoil;
+      });
+
+      renderTable(filtered);
+    }
+
+    function populateDistrictFilter() {
+      const districts = [...new Set(allFarmers.map(f => f.district).filter(Boolean))];
+      const select = document.getElementById('filterDistrict');
+      select.innerHTML = '<option value="">All Districts</option>' +
+        districts.map(d => `<option value="${escapeAttr(d)}">${escapeHtml(d)}</option>`).join('');
+    }
+
+    // ---------- View Farmer ----------
+    function viewFarmer(farmerId) {
+      const farmer = allFarmers.find(f => getFarmerId(f) === String(farmerId));
+      if (!farmer) {
+        console.error('viewFarmer: farmer not found for id:', farmerId);
+        showToast('Farmer not found', 'error');
+        return;
+      }
+
+      document.getElementById('farmerModalTitle').textContent = '👤 ' + farmer.name;
+      document.getElementById('modalSaveBtn').style.display = 'none';
+
+      const photoUrl = safeFixUrl(farmer.farmerPhotoURL);
+      const productUrl = safeFixUrl(farmer.productPhotoURL);
+
+      document.getElementById('farmerModalBody').innerHTML = `
+        <div style="display: flex; gap: var(--space-lg); flex-wrap: wrap;">
+          <div style="text-align: center; min-width: 150px;">
+            ${photoUrl
+              ? `<img src="${photoUrl}" style="width:120px;height:120px;border-radius:50%;object-fit:cover;border:3px solid var(--primary);margin-bottom:12px;" alt="${escapeHtml(farmer.name)}">`
+              : '<div style="width:120px;height:120px;border-radius:50%;background:var(--bg-input);display:flex;align-items:center;justify-content:center;font-size:3rem;margin:0 auto 12px;">👤</div>'}
+            <h4>${escapeHtml(farmer.name)}</h4>
+            <p style="color: var(--text-muted); font-size: 0.85rem;">ID: ${escapeHtml(getFarmerId(farmer))}</p>
+          </div>
+          <div style="flex:1; min-width: 250px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap: 12px;">
+              ${detailRow('Aadhaar', farmer.aadhaarNo)}
+              ${detailRow('Gender', farmer.gender)}
+              ${detailRow('Mobile', farmer.mobileNo)}
+              ${detailRow('Village', farmer.village)}
+              ${detailRow('Tahsil', farmer.tahsil)}
+              ${detailRow('District', farmer.district)}
+              ${detailRow('Location', farmer.location)}
+              ${detailRow('Crops', farmer.cropsGrown)}
+              ${detailRow('Soil Type', farmer.soilType)}
+              ${detailRow('Has Product Photo', farmer.hasProductPhoto)}
+              ${detailRow('Date of First Use', farmer.dateOfFirstUse ? farmer.dateOfFirstUse.split('T')[0] : '')}
+              ${detailRow('Method of Use', farmer.methodOfUse)}
+              ${detailRow('Vegetative Growth', farmer.vegetativeGrowth)}
+              ${detailRow('Yield Result', farmer.yieldResult)}
+              ${detailRow('Registered', farmer.registrationDate ? farmer.registrationDate.split('T')[0] : '')}
+            </div>
+          </div>
+        </div>
+        ${productUrl
+          ? `<div style="margin-top:var(--space-lg);">
+               <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:8px;">Product Photo:</p>
+               <img src="${productUrl}" style="max-width:300px;border-radius:var(--radius-md);border:1px solid var(--border);" alt="Product photo">
+             </div>`
+          : ''}
+      `;
+
+      openModal('farmerModal');
+    }
+
+    function detailRow(label, value) {
+      return `<div style="padding:8px 0;border-bottom:1px solid var(--border);">
+        <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">${escapeHtml(label)}</div>
+        <div style="font-size:0.9rem;color:var(--text-primary);margin-top:2px;">${escapeHtml(value) || '—'}</div>
+      </div>`;
+    }
+
+    // ---------- Edit Farmer ----------
+    function editFarmer(farmerId) {
+      const farmer = allFarmers.find(f => getFarmerId(f) === String(farmerId));
+      if (!farmer) {
+        console.error('editFarmer: farmer not found for id:', farmerId);
+        showToast('Farmer not found', 'error');
+        return;
+      }
+
+      editTargetId = getFarmerId(farmer);
+      document.getElementById('farmerModalTitle').textContent = '✏️ Edit: ' + farmer.name;
+      document.getElementById('modalSaveBtn').style.display = 'inline-flex';
+
+      document.getElementById('farmerModalBody').innerHTML = `
+        <div id="modalEditForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Name <span class="required">*</span></label>
+              <input type="text" class="form-control" id="modalName" value="${escapeAttr(farmer.name)}" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Farmer ID</label>
+              <input type="text" class="form-control" value="${escapeAttr(getFarmerId(farmer))}" disabled style="opacity:0.6;">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Aadhaar No</label>
+              <input type="text" class="form-control" id="modalAadhaar" value="${escapeAttr(farmer.aadhaarNo)}" maxlength="12">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Mobile No</label>
+              <input type="tel" class="form-control" id="modalMobile" value="${escapeAttr(farmer.mobileNo)}" maxlength="10">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Gender</label>
+              <select class="form-control" id="modalGender">
+                <option value="Male" ${farmer.gender === 'Male' ? 'selected' : ''}>Male</option>
+                <option value="Female" ${farmer.gender === 'Female' ? 'selected' : ''}>Female</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Soil Type</label>
+              <select class="form-control" id="modalSoilType">
+                <option value="Light" ${farmer.soilType === 'Light' ? 'selected' : ''}>Light</option>
+                <option value="Medium" ${farmer.soilType === 'Medium' ? 'selected' : ''}>Medium</option>
+                <option value="Heavy" ${farmer.soilType === 'Heavy' ? 'selected' : ''}>Heavy</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Village</label>
+              <input type="text" class="form-control" id="modalVillage" value="${escapeAttr(farmer.village)}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Tahsil</label>
+              <input type="text" class="form-control" id="modalTahsil" value="${escapeAttr(farmer.tahsil)}">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">District</label>
+              <input type="text" class="form-control" id="modalDistrict" value="${escapeAttr(farmer.district)}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Location</label>
+              <input type="text" class="form-control" id="modalLocation" value="${escapeAttr(farmer.location)}">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Crops Grown</label>
+            <div class="check-group">
+              ${['Sugarcane', 'Soybean', 'Pomegranate', 'Maize'].map(c =>
+                `<label class="check-item">
+                  <input type="checkbox" name="modalCrops" value="${c}" ${(farmer.cropsGrown || '').includes(c) ? 'checked' : ''}>
+                  <span>${c}</span>
+                </label>`
+              ).join('')}
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Date of First Use</label>
+              <input type="date" class="form-control" id="modalDateOfFirstUse" value="${escapeAttr(farmer.dateOfFirstUse ? farmer.dateOfFirstUse.split('T')[0] : '')}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Method of Use</label>
+              <select class="form-control" id="modalMethodOfUse">
+                <option value="Spray" ${farmer.methodOfUse === 'Spray' ? 'selected' : ''}>Spray</option>
+                <option value="Drenching" ${farmer.methodOfUse === 'Drenching' ? 'selected' : ''}>Drenching</option>
+                <option value="Both" ${farmer.methodOfUse === 'Both' ? 'selected' : ''}>Both</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Vegetative Growth</label>
+              <select class="form-control" id="modalVegetativeGrowth">
+                <option value="Increase" ${farmer.vegetativeGrowth === 'Increase' ? 'selected' : ''}>Increase</option>
+                <option value="No Response" ${farmer.vegetativeGrowth === 'No Response' ? 'selected' : ''}>No Response</option>
+                <option value="Decrease" ${farmer.vegetativeGrowth === 'Decrease' ? 'selected' : ''}>Decrease</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Yield Result</label>
+              <select class="form-control" id="modalYieldResult">
+                <option value="No Result" ${farmer.yieldResult === 'No Result' ? 'selected' : ''}>No Result</option>
+                <option value="Increase Yield" ${farmer.yieldResult === 'Increase Yield' ? 'selected' : ''}>Increase Yield</option>
+                <option value="Lower Yield" ${farmer.yieldResult === 'Lower Yield' ? 'selected' : ''}>Lower Yield</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      `;
+
+      openModal('farmerModal');
+    }
+
+    async function saveModalEdit() {
+      if (!editTargetId) return;
+
+      const nameVal = document.getElementById('modalName').value.trim();
+      if (!nameVal) {
+        showToast('Name is required', 'error');
+        return;
+      }
+
+      showLoading(true, 'Saving changes…');
+
+      try {
+        const crops = Array.from(
+          document.querySelectorAll('input[name="modalCrops"]:checked')
+        ).map(c => c.value);
+
+        const data = {
+          farmerId: editTargetId,
+          name: nameVal,
+          aadhaarNo: document.getElementById('modalAadhaar').value.trim(),
+          gender: document.getElementById('modalGender').value,
+          mobileNo: document.getElementById('modalMobile').value.trim(),
+          village: document.getElementById('modalVillage').value.trim(),
+          tahsil: document.getElementById('modalTahsil').value.trim(),
+          district: document.getElementById('modalDistrict').value.trim(),
+          location: document.getElementById('modalLocation').value.trim(),
+          cropsGrown: crops.join(', '),
+          soilType: document.getElementById('modalSoilType').value,
+          dateOfFirstUse: document.getElementById('modalDateOfFirstUse').value,
+          methodOfUse: document.getElementById('modalMethodOfUse').value,
+          vegetativeGrowth: document.getElementById('modalVegetativeGrowth').value,
+          yieldResult: document.getElementById('modalYieldResult').value,
+          farmerPhoto: ''
+        };
+
+        const result = await apiCall('updateFarmer', data);
+
+        if (result.success) {
+          showToast('Farmer updated successfully!', 'success');
+          closeModal('farmerModal');
+          loadAllFarmers();
+        } else {
+          showToast(result.message || 'Update failed', 'error');
+        }
+      } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // ---------- Delete ----------
+    function deleteFarmer(farmerId, name) {
+      deleteTargetId = String(farmerId);
+      document.getElementById('deleteTargetName').textContent = name;
+      openModal('deleteModal');
+    }
+
+    async function confirmDelete() {
+      if (!deleteTargetId) return;
+
+      showLoading(true, 'Deleting farmer…');
+      closeModal('deleteModal');
+
+      try {
+        const result = await apiCall('deleteFarmer', { farmerId: deleteTargetId });
+
+        if (result.success) {
+          showToast('Farmer deleted successfully', 'success');
+          loadAllFarmers();
+        } else {
+          showToast(result.message || 'Delete failed', 'error');
+        }
+      } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+      } finally {
+        showLoading(false);
+        deleteTargetId = null;
+      }
+    }
+
+    // ---------- Modal Helpers ----------
+    function openModal(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+    }
+
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    }
+
+    // Close modal on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          overlay.classList.remove('active');
+          document.body.style.overflow = '';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

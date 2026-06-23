@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="Register as a farmer — Create your profile with personal, location, and farming details.">
+  <title>Farmer Portal — Register</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" type="image/png" href="images/logo.png">
+
+<body>
+  <div class="bg-animated"></div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner spinner-lg"></div>
+    <span class="loading-text">Registering your profile…</span>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <div class="register-page">
+    <div class="register-container">
+      <!-- Header -->
+      <div class="register-header">
+
+        <h1 class="portal-title">
+          <img src="images/logo.png" alt="Logo" class="logo">
+          Farmer Portal
+        </h1>
+        <p>Create your account by filling in the details below</p>
+      </div>
+
+      <!-- Progress Steps -->
+      <div class="progress-steps">
+        <div class="step-item active" data-step="1">
+          <div class="step-circle">1</div>
+          <span class="step-label">Personal Info</span>
+        </div>
+        <div class="step-line" id="stepLine1"></div>
+        <div class="step-item" data-step="2">
+          <div class="step-circle">2</div>
+          <span class="step-label">Location</span>
+        </div>
+        <div class="step-line" id="stepLine2"></div>
+        <div class="step-item" data-step="3">
+          <div class="step-circle">3</div>
+          <span class="step-label">Farming Details</span>
+        </div>
+      </div>
+
+      <!-- Registration Form -->
+      <form id="registerForm" class="glass-card" style="padding: var(--space-xl);" autocomplete="off">
+
+        <!-- Step 1: Personal Info -->
+        <div class="form-step active" id="step1">
+          <h3 class="form-step-title">👤 Personal Information</h3>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="farmerName">Name of Farmer <span class="required">*</span></label>
+              <input type="text" class="form-control" id="farmerName" placeholder="Full name" required>
+              <div class="error-message">Name is required</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="farmerId">Farmer ID <span class="required">*</span></label>
+              <input type="text" class="form-control" id="farmerId" placeholder="Unique Farmer ID" required>
+              <div class="error-message">Farmer ID is required</div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="farmerPassword">Password <span class="required">*</span></label>
+              <input type="password" class="form-control" id="farmerPassword" placeholder="Create password" required
+                minlength="4">
+              <div class="error-message">Password must be at least 4 characters</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="aadhaarNo">Aadhaar No <span class="required">*</span></label>
+              <input type="text" class="form-control" id="aadhaarNo" placeholder="12-digit Aadhaar" required
+                pattern="\d{12}" maxlength="12">
+              <div class="error-message">Enter a valid 12-digit Aadhaar number</div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Gender <span class="required">*</span></label>
+              <div class="radio-group" id="genderGroup">
+                <label class="radio-item">
+                  <input type="radio" name="gender" value="Male" required>
+                  <span>Male</span>
+                </label>
+                <label class="radio-item">
+                  <input type="radio" name="gender" value="Female">
+                  <span>Female</span>
+                </label>
+              </div>
+              <div class="error-message">Please select gender</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="mobileNo">Mobile No <span class="required">*</span></label>
+              <input type="tel" class="form-control" id="mobileNo" placeholder="10-digit mobile" required
+                pattern="\d{10}" maxlength="10">
+              <div class="error-message">Enter a valid 10-digit mobile number</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Farmer Photo <span class="required">*</span></label>
+            <div class="file-upload-wrapper">
+              <div class="file-upload-area" id="farmerPhotoArea">
+                <span class="upload-icon">📷</span>
+                <span class="upload-text">Click or drag to <span>upload photo</span></span>
+                <span class="upload-text" style="font-size: 0.78rem;">JPEG, PNG — Max 5 MB</span>
+                <input type="file" id="farmerPhoto" accept="image/*" required>
+              </div>
+              <img class="photo-preview" id="farmerPhotoPreview" alt="Farmer photo preview">
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <a href="index.html" class="btn btn-outline">← Back to Login</a>
+            <button type="button" class="btn btn-primary" onclick="nextStep(2)">Next: Location →</button>
+          </div>
+        </div>
+
+        <!-- Step 2: Location -->
+
+
+        <div class="form-step" id="step2">
+          <h3 class="form-step-title">Location Details</h3>
+
+          <div class="form-row">
+
+
+            <!-- State -->
+            <div class="form-group">
+              <label class="form-label" for="state">
+                State <span class="required">*</span>
+              </label>
+              <select class="form-control" id="state" required>
+                <option value="">Select State</option>
+              </select>
+              <div class="error-message">State is required</div>
+            </div>
+
+            <!-- District -->
+            <div class="form-group">
+              <label class="form-label" for="district">
+                District <span class="required">*</span>
+              </label>
+              <select class="form-control" id="district" required>
+                <option value="">Select District</option>
+              </select>
+              <div class="error-message">District is required</div>
+            </div>
+
+
+          </div>
+
+          <div class="form-row">
+
+
+            <!-- Tahsil -->
+            <div class="form-group">
+              <label class="form-label" for="tahsil">
+                Tahsil <span class="required">*</span>
+              </label>
+              <select class="form-control" id="tahsil" required>
+                <option value="">Select Tahsil</option>
+              </select>
+              <div class="error-message">Tahsil is required</div>
+            </div>
+
+            <!-- Village -->
+            <div class="form-group">
+              <label class="form-label" for="village">
+                Village <span class="required">*</span>
+              </label>
+              <input type="text" class="form-control" id="village" placeholder="Village name" required>
+              <div class="error-message">Village is required</div>
+            </div>
+
+
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="location">
+              GPS Coordinates <span class="required">*</span>
+            </label>
+
+            <div style="display:flex;gap:var(--space-sm);">
+
+              <input type="text" class="form-control" id="location" placeholder="Latitude, Longitude" readonly required>
+
+              <button type="button" class="btn btn-outline btn-sm" onclick="getGPSLocation()" id="gpsBtn"
+                style="white-space:nowrap;">
+                Use GPS
+              </button>
+
+            </div>
+
+            <div class="error-message">
+              Location is required
+            </div>
+
+
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-outline" onclick="prevStep(1)">
+              ← Previous
+            </button>
+
+            <button type="button" class="btn btn-primary" onclick="nextStep(3)">
+              Next: Farming Details →
+            </button>
+
+
+          </div>
+        </div>
+
+        <!-- Step 3: Farming Details -->
+        <div class="form-step" id="step3">
+          <h3 class="form-step-title">🌱 Farming Details</h3>
+
+          <div class="form-group">
+            <label class="form-label">Crops Grown <span class="required">*</span></label>
+            <div class="check-group" id="cropsGroup">
+              <label class="check-item">
+                <input type="checkbox" name="crops" value="Sugarcane">
+                <span> Sugarcane</span>
+              </label>
+              <label class="check-item">
+                <input type="checkbox" name="crops" value="Soybean">
+                <span> Soybean</span>
+              </label>
+              <label class="check-item">
+                <input type="checkbox" name="crops" value="Pomegranate">
+                <span> Pomegranate</span>
+              </label>
+              <label class="check-item">
+                <input type="checkbox" name="crops" value="Maize">
+                <span>🌽 Maize</span>
+              </label>
+            </div>
+            <div class="error-message">Select at least one crop</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Soil Type <span class="required">*</span></label>
+            <div class="radio-group" id="soilGroup">
+              <label class="radio-item">
+                <input type="radio" name="soilType" value="Light" required>
+                <span>Light</span>
+              </label>
+              <label class="radio-item">
+                <input type="radio" name="soilType" value="Medium">
+                <span>Medium</span>
+              </label>
+              <label class="radio-item">
+                <input type="radio" name="soilType" value="Heavy">
+                <span>Heavy</span>
+              </label>
+            </div>
+            <div class="error-message">Select soil type</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Photo with Product <span class="required">*</span></label>
+            <div class="radio-group" id="hasProductPhotoGroup">
+              <label class="radio-item">
+                <input type="radio" name="hasProductPhoto" value="Yes" required
+                  onchange="toggleProductPhotoUpload(true)">
+                <span>Yes</span>
+              </label>
+              <label class="radio-item">
+                <input type="radio" name="hasProductPhoto" value="No" onchange="toggleProductPhotoUpload(false)">
+                <span>No</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group" id="productPhotoGroup" style="display: none;">
+            <label class="form-label">Upload Product Photo</label>
+            <div class="file-upload-wrapper">
+              <div class="file-upload-area" id="productPhotoArea">
+                <span class="upload-icon">📸</span>
+                <span class="upload-text">Click or drag to <span>upload product photo</span></span>
+                <span class="upload-text" style="font-size: 0.78rem;">JPEG, PNG — Max 5 MB</span>
+                <input type="file" id="productPhoto" accept="image/*">
+              </div>
+              <img class="photo-preview" id="productPhotoPreview" alt="Product photo preview">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="dateOfFirstUse">Date of First Use <span class="required">*</span></label>
+              <input type="date" class="form-control" id="dateOfFirstUse" required>
+              <div class="error-message">Date is required</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Method of Use <span class="required">*</span></label>
+              <div class="radio-group" id="methodGroup">
+                <label class="radio-item">
+                  <input type="radio" name="methodOfUse" value="Spray" required>
+                  <span>Spray</span>
+                </label>
+                <label class="radio-item">
+                  <input type="radio" name="methodOfUse" value="Drenching">
+                  <span>Drenching</span>
+                </label>
+                <label class="radio-item">
+                  <input type="radio" name="methodOfUse" value="Both">
+                  <span>Both</span>
+                </label>
+              </div>
+              <div class="error-message">Select method of use</div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Vegetative Growth <span class="required">*</span></label>
+              <div class="radio-group" id="vegGrowthGroup">
+                <label class="radio-item">
+                  <input type="radio" name="vegetativeGrowth" value="Increase" required>
+                  <span>Increase</span>
+                </label>
+                <label class="radio-item">
+                  <input type="radio" name="vegetativeGrowth" value="No Response">
+                  <span>No Response</span>
+                </label>
+                <label class="radio-item">
+                  <input type="radio" name="vegetativeGrowth" value="Decrease">
+                  <span>Decrease</span>
+                </label>
+              </div>
+              <div class="error-message">Select vegetative growth</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Yield Result <span class="required">*</span></label>
+              <div class="radio-group" id="yieldGroup">
+                <label class="radio-item">
+                  <input type="radio" name="yieldResult" value="No Result" required>
+                  <span>No Result</span>
+                </label>
+                <label class="radio-item">
+                  <input type="radio" name="yieldResult" value="Increase Yield">
+                  <span>Increase Yield</span>
+                </label>
+                <label class="radio-item">
+                  <input type="radio" name="yieldResult" value="Lower Yield">
+                  <span>Lower Yield</span>
+                </label>
+              </div>
+              <div class="error-message">Select yield result</div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-outline" onclick="prevStep(2)">← Previous</button>
+            <button type="submit" class="btn btn-accent btn-lg" id="registerBtn">✅ Register Farmer</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/script.js"></script>
+  <script>
+    let currentStep = 1;
+    const states = [
+      "Andhra Pradesh",
+      "Arunachal Pradesh",
+      "Assam",
+      "Bihar",
+      "Chhattisgarh",
+      "Goa",
+      "Gujarat",
+      "Haryana",
+      "Himachal Pradesh",
+      "Jharkhand",
+      "Karnataka",
+      "Kerala",
+      "Madhya Pradesh",
+      "Maharashtra",
+      "Manipur",
+      "Meghalaya",
+      "Mizoram",
+      "Nagaland",
+      "Odisha",
+      "Punjab",
+      "Rajasthan",
+      "Sikkim",
+      "Tamil Nadu",
+      "Telangana",
+      "Tripura",
+      "Uttar Pradesh",
+      "Uttarakhand",
+      "West Bengal",
+      "Delhi",
+      "Chandigarh",
+      "Jammu and Kashmir",
+      "Ladakh",
+      "Puducherry"
+    ];
+
+    document.addEventListener("DOMContentLoaded", () => {
+
+      const stateSelect = document.getElementById("state");
+
+      if (stateSelect) {
+
+
+        states.forEach(state => {
+
+          const option =
+            document.createElement("option");
+
+          option.value = state;
+          option.textContent = state;
+
+          stateSelect.appendChild(option);
+        });
+
+
+      }
+    });
+
+
+    // Photo preview handlers
+    setupPhotoPreview('farmerPhoto', 'farmerPhotoPreview');
+    setupPhotoPreview('productPhoto', 'productPhotoPreview');
+
+    function toggleProductPhotoUpload(show) {
+      document.getElementById('productPhotoGroup').style.display = show ? 'block' : 'none';
+    }
+
+    async function getGPSLocation() {
+
+      const btn = document.getElementById('gpsBtn');
+
+      if (!navigator.geolocation) {
+        showToast(
+          'Geolocation is not supported by your browser',
+          'error'
+        );
+        return;
+      }
+
+      btn.textContent = 'Getting Location...';
+      btn.disabled = true;
+
+      navigator.geolocation.getCurrentPosition(
+
+
+        async (pos) => {
+
+          const lat =
+            pos.coords.latitude;
+
+          const lng =
+            pos.coords.longitude;
+
+          document.getElementById('location').value =
+            lat.toFixed(6) +
+            ', ' +
+            lng.toFixed(6);
+
+          try {
+
+            const response =
+              await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+              );
+
+            const data =
+              await response.json();
+
+            const address =
+              data.address || {};
+
+            // State
+            if (
+              address.state &&
+              document.getElementById("state")
+            ) {
+              document.getElementById("state").value =
+                address.state;
+            }
+
+            // District
+            const districtName =
+              address.county ||
+              address.state_district ||
+              "";
+
+            if (districtName) {
+
+              const districtSelect =
+                document.getElementById("district");
+
+              districtSelect.innerHTML =
+                `<option value="${districtName}" selected>
+      ${districtName}
+    </option>`;
+            }
+
+            // Tahsil
+            const tahsilName =
+              address.municipality ||
+              address.city_district ||
+              address.suburb ||
+              address.town ||
+              address.city ||
+              "";
+
+            if (tahsilName) {
+
+              const tahsilSelect =
+                document.getElementById("tahsil");
+
+              tahsilSelect.innerHTML =
+                `<option value="${tahsilName}" selected>
+      ${tahsilName}
+    </option>`;
+            }
+
+            // Village
+            const village =
+              address.village ||
+              address.hamlet ||
+              address.locality ||
+              address.suburb ||
+              "";
+
+            if (village) {
+              document.getElementById("village").value =
+                village;
+            }
+
+            showToast(
+              'Location captured successfully!',
+              'success'
+            );
+
+          } catch (error) {
+
+            console.error(error);
+
+            showToast(
+              'GPS found coordinates but address lookup failed',
+              'error'
+            );
+          }
+
+          btn.textContent = 'Use GPS';
+          btn.disabled = false;
+        },
+
+        (err) => {
+
+          showToast(
+            'Unable to get location: ' + err.message,
+            'error'
+          );
+
+          btn.textContent = 'Use GPS';
+          btn.disabled = false;
+        },
+
+        {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 0
+        }
+
+
+      );
+    }
+
+
+    function validateStep(step) {
+      let valid = true;
+      const stepEl = document.getElementById('step' + step);
+
+      // Clear previous errors
+      stepEl.querySelectorAll('.form-group').forEach(g => g.classList.remove('has-error'));
+
+      if (step === 1) {
+        const fields = ['farmerName', 'farmerId', 'farmerPassword', 'aadhaarNo', 'mobileNo'];
+        fields.forEach(id => {
+          const input = document.getElementById(id);
+          if (!input.value.trim() || !input.checkValidity()) {
+            input.closest('.form-group').classList.add('has-error');
+            valid = false;
+          }
+        });
+        // Gender
+        if (!document.querySelector('input[name="gender"]:checked')) {
+          document.getElementById('genderGroup').closest('.form-group').classList.add('has-error');
+          valid = false;
+        }
+        // Farmer photo
+        if (!document.getElementById('farmerPhoto').files.length) {
+          document.getElementById('farmerPhoto').closest('.form-group').classList.add('has-error');
+          valid = false;
+        }
+      } else if (step === 2) {
+        ['state', 'village', 'tahsil', 'district', 'location'].forEach(id => {
+          const input = document.getElementById(id);
+          if (!input.value.trim()) {
+            input.closest('.form-group').classList.add('has-error');
+            valid = false;
+          }
+        });
+      } else if (step === 3) {
+        // Crops
+        if (!document.querySelectorAll('input[name="crops"]:checked').length) {
+          document.getElementById('cropsGroup').closest('.form-group').classList.add('has-error');
+          valid = false;
+        }
+        // Soil type
+        if (!document.querySelector('input[name="soilType"]:checked')) {
+          document.getElementById('soilGroup').closest('.form-group').classList.add('has-error');
+          valid = false;
+        }
+        // Date
+        if (!document.getElementById('dateOfFirstUse').value) {
+          document.getElementById('dateOfFirstUse').closest('.form-group').classList.add('has-error');
+          valid = false;
+        }
+        // Radio groups
+        ['methodOfUse', 'vegetativeGrowth', 'yieldResult', 'hasProductPhoto'].forEach(name => {
+          if (!document.querySelector(`input[name="${name}"]:checked`)) {
+            const group = document.getElementById(name === 'methodOfUse' ? 'methodGroup' :
+              name === 'vegetativeGrowth' ? 'vegGrowthGroup' :
+                name === 'yieldResult' ? 'yieldGroup' : 'hasProductPhotoGroup');
+            if (group) group.closest('.form-group').classList.add('has-error');
+            valid = false;
+          }
+        });
+      }
+
+      if (!valid) showToast('Please fill in all required fields', 'error');
+      return valid;
+    }
+
+    function goToStep(step) {
+      currentStep = step;
+      document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
+      document.getElementById('step' + step).classList.add('active');
+
+      document.querySelectorAll('.step-item').forEach(s => {
+        const sNum = parseInt(s.dataset.step);
+        s.classList.remove('active', 'completed');
+        if (sNum === step) s.classList.add('active');
+        else if (sNum < step) s.classList.add('completed');
+      });
+
+      // Step lines
+      document.getElementById('stepLine1').classList.toggle('active', step > 1);
+      document.getElementById('stepLine2').classList.toggle('active', step > 2);
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function nextStep(step) {
+      if (validateStep(step - 1)) goToStep(step);
+    }
+
+    function prevStep(step) {
+      goToStep(step);
+    }
+
+    // Submit
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!validateStep(3)) return;
+
+      showLoading(true, 'Registering your profile…');
+
+      try {
+        const farmerPhotoBase64 = await fileToBase64(document.getElementById('farmerPhoto').files[0]);
+
+        let productPhotoBase64 = '';
+        const hasProduct = document.querySelector('input[name="hasProductPhoto"]:checked')?.value;
+        if (hasProduct === 'Yes' && document.getElementById('productPhoto').files.length) {
+          productPhotoBase64 = await fileToBase64(document.getElementById('productPhoto').files[0]);
+        }
+
+        const crops = Array.from(document.querySelectorAll('input[name="crops"]:checked')).map(c => c.value);
+
+        const data = {
+          farmerId: document.getElementById('farmerId').value.trim(),
+          password: document.getElementById('farmerPassword').value.trim(),
+          name: document.getElementById('farmerName').value.trim(),
+          aadhaarNo: document.getElementById('aadhaarNo').value.trim(),
+          gender: document.querySelector('input[name="gender"]:checked').value,
+          farmerPhoto: farmerPhotoBase64,
+          mobileNo: document.getElementById('mobileNo').value.trim(),
+          state: document.getElementById('state').value.trim(),
+          village: document.getElementById('village').value.trim(),
+          tahsil: document.getElementById('tahsil').value.trim(),
+          district: document.getElementById('district').value.trim(),
+          location: document.getElementById('location').value.trim(),
+          cropsGrown: crops.join(', '),
+          soilType: document.querySelector('input[name="soilType"]:checked').value,
+          hasProductPhoto: hasProduct,
+          productPhoto: productPhotoBase64,
+          dateOfFirstUse: document.getElementById('dateOfFirstUse').value,
+          methodOfUse: document.querySelector('input[name="methodOfUse"]:checked').value,
+          vegetativeGrowth: document.querySelector('input[name="vegetativeGrowth"]:checked').value,
+          yieldResult: document.querySelector('input[name="yieldResult"]:checked').value
+        };
+
+        const result = await apiCall('register', data);
+
+        if (result.success) {
+          showToast('Registration successful! Redirecting to login…', 'success');
+          setTimeout(() => { window.location.href = 'index.html'; }, 1500);
+        } else {
+          showToast(result.message || 'Registration failed', 'error');
+        }
+      } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+      } finally {
+        showLoading(false);
+      }
+    });
+  </script>
+
+</body>
+
+</html>
