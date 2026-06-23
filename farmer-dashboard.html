@@ -7,8 +7,7 @@
   <meta name="description" content="View and edit your farmer profile — Farmer Dashboard.">
   <title>Farmer Portal — My Dashboard</title>
   <link rel="stylesheet" href="css/style.css">
-  <link rel="icon"
-    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>">
+  <link rel="icon" type="image/png" href="images/logo.png">
 </head>
 
 <body>
@@ -28,7 +27,7 @@
     <nav class="navbar">
       <div class="navbar-inner">
         <div class="navbar-brand">
-          <div class="brand-icon">🌾</div>
+          <img src="images/logo.png" alt="Logo" class="navbar-logo">
           <span>Farmer Portal</span>
         </div>
         <div class="navbar-user">
@@ -160,19 +159,19 @@
               <div class="check-group" id="editCropsGroup">
                 <label class="check-item">
                   <input type="checkbox" name="editCrops" value="Sugarcane">
-                  <span>🌿 Sugarcane</span>
+                  <span> Sugarcane</span>
                 </label>
                 <label class="check-item">
                   <input type="checkbox" name="editCrops" value="Soybean">
-                  <span>🫘 Soybean</span>
+                  <span> Soybean</span>
                 </label>
                 <label class="check-item">
                   <input type="checkbox" name="editCrops" value="Pomegranate">
-                  <span>🍎 Pomegranate</span>
+                  <span> Pomegranate</span>
                 </label>
                 <label class="check-item">
                   <input type="checkbox" name="editCrops" value="Maize">
-                  <span>🌽 Maize</span>
+                  <span> Maize</span>
                 </label>
               </div>
             </div>
@@ -259,7 +258,7 @@
 
             <div class="form-actions" style="border-top: none; padding-top: 0;">
               <div></div>
-              <button type="submit" class="btn btn-primary btn-lg">💾 Save Changes</button>
+              <button type="submit" class="btn btn-primary btn-lg"> Save Changes</button>
             </div>
           </form>
         </div>
@@ -305,7 +304,13 @@
         document.getElementById('profilePhotoPlaceholder').style.display = 'none';
       }
       document.getElementById('profileName').textContent = data.name || '—';
-      document.getElementById('profileIdDisplay').textContent = 'ID: ' + (data.farmerId || '—');
+      const farmerId = data.farmerId || data.farmerID || '—';
+
+      document.getElementById('profileIdDisplay').textContent =
+        'ID: ' + farmerId;
+
+      document.getElementById('editFarmerId').value =
+        farmerId;
       document.getElementById('metaMobile').textContent = data.mobileNo || '—';
       document.getElementById('metaVillage').textContent = data.village || '—';
       document.getElementById('metaDistrict').textContent = data.district || '—';
@@ -315,7 +320,7 @@
 
       // Edit form
       document.getElementById('editName').value = data.name || '';
-      document.getElementById('editFarmerId').value = data.farmerId || '';
+
       document.getElementById('editAadhaar').value = data.aadhaarNo || '';
       document.getElementById('editMobile').value = data.mobileNo || '';
       document.getElementById('editVillage').value = data.village || '';

@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Admin Dashboard — View all farmers, analytics, and manage records.">
   <title>Farmer Portal — Admin Dashboard</title>
   <link rel="stylesheet" href="css/style.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>">
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>">
 </head>
+
 <body>
   <div class="bg-animated"></div>
 
@@ -31,7 +34,8 @@
         <div class="confirm-body">
           <div class="confirm-icon">🗑️</div>
           <p>Are you sure you want to delete farmer <strong id="deleteTargetName">—</strong>?</p>
-          <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 8px;">This action cannot be undone. All data and photos will be permanently removed.</p>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 8px;">This action cannot be undone. All
+            data and photos will be permanently removed.</p>
         </div>
       </div>
       <div class="modal-footer">
@@ -53,7 +57,8 @@
       </div>
       <div class="modal-footer" id="farmerModalFooter">
         <button class="btn btn-outline" onclick="closeModal('farmerModal')">Close</button>
-        <button class="btn btn-primary" id="modalSaveBtn" style="display:none;" onclick="saveModalEdit()">💾 Save Changes</button>
+        <button class="btn btn-primary" id="modalSaveBtn" style="display:none;" onclick="saveModalEdit()">💾 Save
+          Changes</button>
       </div>
     </div>
   </div>
@@ -63,11 +68,11 @@
     <nav class="navbar">
       <div class="navbar-inner">
         <div class="navbar-brand">
-          <div class="brand-icon">🌾</div>
+          <img src="images/logo.png" alt="Logo" class="navbar-logo">
           <span>Farmer Portal</span>
         </div>
         <div class="navbar-user">
-          <span class="user-name">🔐 <strong>Admin</strong></span>
+          <span class="user-name"><strong>Admin</strong></span>
           <button class="btn btn-outline btn-sm" onclick="logout()">Logout</button>
         </div>
       </div>
@@ -83,39 +88,74 @@
       <!-- Stats Cards -->
       <div class="stats-grid" id="statsGrid">
         <div class="stat-card">
-          <div class="stat-card-icon">👥</div>
+          <div class="stat-card-icon">
+            <img src="images/farmer.png" alt="Farmer" class="stat-icon-img">
+          </div>
           <div class="stat-card-value" id="statTotal">0</div>
           <div class="stat-card-label">Total Farmers</div>
         </div>
         <div class="stat-card">
-          <div class="stat-card-icon">🌾</div>
+          <div class="stat-card-icon">
+            <img src="images/crops.jpg" alt="Crops" class="stat-icon-img">
+          </div>
           <div class="stat-card-value" id="statCrops">0</div>
           <div class="stat-card-label">Crop Types Tracked</div>
           <div class="stat-card-detail" id="statCropsDetail"></div>
         </div>
         <div class="stat-card">
-          <div class="stat-card-icon">🏘️</div>
+          <div class="stat-card-icon">
+            <img src="images/village.jpg" alt="Village" class="stat-icon-img">
+          </div>
           <div class="stat-card-value" id="statVillages">0</div>
           <div class="stat-card-label">Villages Covered</div>
           <div class="stat-card-detail" id="statVillagesDetail"></div>
         </div>
         <div class="stat-card">
-          <div class="stat-card-icon">📍</div>
+          <div class="stat-card-icon">
+            <img src="images/location.png" alt="Location" class="stat-icon-img">
+          </div>
           <div class="stat-card-value" id="statDistricts">0</div>
           <div class="stat-card-label">Districts</div>
           <div class="stat-card-detail" id="statDistrictsDetail"></div>
         </div>
         <div class="stat-card">
-          <div class="stat-card-icon">🆕</div>
+          <div class="stat-card-icon">
+            <img src="images/recent.jpg" alt="Recent Registrations" class="stat-icon-img">
+          </div>
           <div class="stat-card-value" id="statRecent">0</div>
           <div class="stat-card-label">Recent (7 days)</div>
         </div>
       </div>
 
+      <!-- Analytics Section -->
+      <div class="analytics-section">
+
+        <div class="analytics-card">
+          <h3>Crop Distribution</h3>
+          <canvas id="cropChart"></canvas>
+        </div>
+
+        <div class="analytics-card">
+          <h3>District Coverage</h3>
+          <canvas id="districtChart"></canvas>
+        </div>
+
+        <div class="analytics-card">
+          <h3>Soil Type Analysis</h3>
+          <canvas id="soilChart"></canvas>
+        </div>
+
+        <div class="analytics-card">
+          <h3>Registration Trend</h3>
+          <canvas id="registrationChart"></canvas>
+        </div>
+
+      </div>
+
       <!-- Farmer Table -->
       <div class="table-section">
         <div class="table-toolbar">
-          <h3>👨‍🌾 All Farmers</h3>
+          <h3> All Farmers</h3>
           <div class="search-box">
             <input type="text" id="searchInput" placeholder="Search by name, ID, or village…" oninput="filterTable()">
           </div>
@@ -206,6 +246,7 @@
           renderStats();
           renderTable(allFarmers);
           populateDistrictFilter();
+          renderCharts();
         } else {
           showToast(result.message || 'Failed to load farmers', 'error');
         }
@@ -256,6 +297,110 @@
       });
       animateCounter('statRecent', recent.length);
     }
+    function renderCharts() {
+      const chartColors = [
+        '#2563EB', // Blue
+        '#10B981', // Emerald
+        '#F59E0B', // Amber
+        '#EF4444', // Red
+        '#8B5CF6', // Purple
+        '#06B6D4', // Cyan
+        '#F97316', // Orange
+        '#84CC16', // Lime
+        '#EC4899', // Pink
+        '#6366F1'  // Indigo
+      ];
+
+      const cropMap = {};
+      const districtMap = {};
+      const soilMap = {};
+      const registrationMap = {};
+
+      allFarmers.forEach(f => {
+
+        if (f.cropsGrown) {
+          f.cropsGrown.split(',').forEach(crop => {
+            crop = crop.trim();
+            cropMap[crop] = (cropMap[crop] || 0) + 1;
+          });
+        }
+
+        if (f.district) {
+          districtMap[f.district] =
+            (districtMap[f.district] || 0) + 1;
+        }
+
+        if (f.soilType) {
+          soilMap[f.soilType] =
+            (soilMap[f.soilType] || 0) + 1;
+        }
+
+        if (f.registrationDate) {
+          const date = f.registrationDate.split('T')[0];
+          registrationMap[date] =
+            (registrationMap[date] || 0) + 1;
+        }
+      });
+
+      new Chart(document.getElementById('cropChart'), {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(cropMap),
+          datasets: [{
+            data: Object.values(cropMap),
+            backgroundColor: chartColors
+          }]
+        }
+      });
+
+      new Chart(document.getElementById('districtChart'), {
+        type: 'bar',
+        data: {
+          labels: Object.keys(districtMap),
+          datasets: [{
+            label: 'Farmers',
+            data: Object.values(districtMap),
+            backgroundColor: '#2563eb'
+          }]
+        }
+      });
+
+      new Chart(document.getElementById('soilChart'), {
+        type: 'pie',
+        data: {
+          labels: Object.keys(soilMap),
+          datasets: [{
+            data: Object.values(soilMap),
+            backgroundColor: chartColors
+          }]
+        }
+      });
+
+      new Chart(document.getElementById('registrationChart'), {
+        type: 'line',
+        data: {
+          labels: Object.keys(registrationMap),
+          datasets: [{
+            label: 'Registrations',
+            data: Object.values(registrationMap),
+            borderColor: '#8B5CF6',
+            backgroundColor: 'rgba(139,92,246,0.15)',
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                stepSize: 1
+              }
+            }
+          }
+        }
+      });
+    }
 
     function animateCounter(elementId, target) {
       const el = document.getElementById(elementId);
@@ -295,8 +440,8 @@
           <tr>
             <td>
               ${f.farmerPhotoURL
-                ? `<img src="${safeFixUrl(f.farmerPhotoURL)}" class="table-avatar" alt="${escapeHtml(f.name)}" onerror="this.outerHTML='<span style=\\'font-size:1.5rem\\'>👤</span>'">`
-                : '<span style="font-size:1.5rem">👤</span>'}
+            ? `<img src="${safeFixUrl(f.farmerPhotoURL)}" class="table-avatar" alt="${escapeHtml(f.name)}" onerror="this.outerHTML='<span style=\\'font-size:1.5rem\\'>👤</span>'">`
+            : '<span style="font-size:1.5rem">👤</span>'}
             </td>
             <td><strong>${fidEsc}</strong></td>
             <td>${escapeHtml(f.name)}</td>
@@ -389,8 +534,8 @@
         <div style="display: flex; gap: var(--space-lg); flex-wrap: wrap;">
           <div style="text-align: center; min-width: 150px;">
             ${photoUrl
-              ? `<img src="${photoUrl}" style="width:120px;height:120px;border-radius:50%;object-fit:cover;border:3px solid var(--primary);margin-bottom:12px;" alt="${escapeHtml(farmer.name)}">`
-              : '<div style="width:120px;height:120px;border-radius:50%;background:var(--bg-input);display:flex;align-items:center;justify-content:center;font-size:3rem;margin:0 auto 12px;">👤</div>'}
+          ? `<img src="${photoUrl}" style="width:120px;height:120px;border-radius:50%;object-fit:cover;border:3px solid var(--primary);margin-bottom:12px;" alt="${escapeHtml(farmer.name)}">`
+          : '<div style="width:120px;height:120px;border-radius:50%;background:var(--bg-input);display:flex;align-items:center;justify-content:center;font-size:3rem;margin:0 auto 12px;">👤</div>'}
             <h4>${escapeHtml(farmer.name)}</h4>
             <p style="color: var(--text-muted); font-size: 0.85rem;">ID: ${escapeHtml(getFarmerId(farmer))}</p>
           </div>
@@ -508,11 +653,11 @@
             <label class="form-label">Crops Grown</label>
             <div class="check-group">
               ${['Sugarcane', 'Soybean', 'Pomegranate', 'Maize'].map(c =>
-                `<label class="check-item">
+        `<label class="check-item">
                   <input type="checkbox" name="modalCrops" value="${c}" ${(farmer.cropsGrown || '').includes(c) ? 'checked' : ''}>
                   <span>${c}</span>
                 </label>`
-              ).join('')}
+      ).join('')}
             </div>
           </div>
           <div class="form-row">
@@ -661,5 +806,7 @@
       });
     });
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
+
 </html>
