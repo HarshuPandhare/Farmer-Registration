@@ -132,40 +132,38 @@
         <!-- Step 2: Location -->
 
 
+
+
         <div class="form-step" id="step2">
           <h3 class="form-step-title">Location Details</h3>
+
           <div class="form-group">
             <label class="form-label" for="location">
-              GPS Coordinates <span class="required">*</span>
+              GPS Coordinates
             </label>
 
             <div style="display:flex;gap:var(--space-sm);">
-
-              <input type="text" class="form-control" id="location" placeholder="Latitude, Longitude" readonly required>
+              <input type="text" class="form-control" id="location" placeholder="Latitude, Longitude" readonly>
 
               <button type="button" class="btn btn-outline btn-sm" onclick="getGPSLocation()" id="gpsBtn"
                 style="white-space:nowrap;">
                 Use GPS
               </button>
-
             </div>
 
             <div class="error-message">
               Location is required
             </div>
-
-
           </div>
 
           <div class="form-row">
 
-
             <!-- State -->
             <div class="form-group">
               <label class="form-label" for="state">
-                State <span class="required">*</span>
+                State
               </label>
-              <select class="form-control" id="state" required>
+              <select class="form-control" id="state">
                 <option value="">Select State</option>
               </select>
               <div class="error-message">State is required</div>
@@ -174,44 +172,31 @@
             <!-- District -->
             <div class="form-group">
               <label class="form-label" for="district">
-                District <span class="required">*</span>
+                District
               </label>
-              <select class="form-control" id="district" required>
-                <option value="">Select District</option>
-              </select>
+              <input type="text" class="form-control" id="district" placeholder="Enter District">
               <div class="error-message">District is required</div>
             </div>
-
-
-          </div>
-
-          <div class="form-row">
-
 
             <!-- Tahsil -->
             <div class="form-group">
               <label class="form-label" for="tahsil">
-                Tahsil <span class="required">*</span>
+                Tahsil
               </label>
-              <select class="form-control" id="tahsil" required>
-                <option value="">Select Tahsil</option>
-              </select>
+              <input type="text" class="form-control" id="tahsil" placeholder="Enter Tahsil">
               <div class="error-message">Tahsil is required</div>
             </div>
 
             <!-- Village -->
             <div class="form-group">
               <label class="form-label" for="village">
-                Village <span class="required">*</span>
+                Village
               </label>
-              <input type="text" class="form-control" id="village" placeholder="Village name" required>
+              <input type="text" class="form-control" id="village" placeholder="Village name">
               <div class="error-message">Village is required</div>
             </div>
 
-
           </div>
-
-
 
           <div class="form-actions">
             <button type="button" class="btn btn-outline" onclick="prevStep(1)">
@@ -221,8 +206,6 @@
             <button type="button" class="btn btn-primary" onclick="nextStep(3)">
               Next: Farming Details →
             </button>
-
-
           </div>
         </div>
 
@@ -249,6 +232,22 @@
                 <input type="checkbox" name="crops" value="Maize">
                 <span> Maize</span>
               </label>
+              <!-- New -->
+              <label class="check-item">
+                <input type="checkbox" name="crops" value="Vegetables">
+                <span>Vegetables</span>
+              </label>
+
+              <!-- Other -->
+              <div style="margin-top:10px;width:100%;">
+                <label class="check-item" style="margin-bottom:8px;">
+                  <input type="checkbox" id="otherCropCheck"
+                    onchange="document.getElementById('otherCrop').disabled=!this.checked;">
+                  <span>Other</span>
+                </label>
+
+                <input type="text" id="otherCrop" class="form-control" placeholder="Enter other crop" disabled>
+              </div>
             </div>
             <div class="error-message">Select at least one crop</div>
           </div>
@@ -305,6 +304,26 @@
               <label class="form-label" for="dateOfFirstUse">Date of First Use <span class="required">*</span></label>
               <input type="date" class="form-control" id="dateOfFirstUse" required>
               <div class="error-message">Date is required</div>
+            </div>
+            <div class="form-row">
+
+              <div class="form-group">
+                <label class="form-label">
+                  No. of (Bhujivan) Applications
+                </label>
+
+                <input type="number" class="form-control" id="bhujivanApplications" min="1" step="1"
+                  placeholder="Example: 1">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">
+                  Period of Application
+                </label>
+
+                <input type="text" class="form-control" id="applicationPeriod" placeholder="Example: 2 Months">
+              </div>
+
             </div>
             <div class="form-group">
               <label class="form-label">Method of Use <span class="required">*</span></label>
@@ -595,13 +614,7 @@
           valid = false;
         }
       } else if (step === 2) {
-        ['state', 'village', 'tahsil', 'district', 'location'].forEach(id => {
-          const input = document.getElementById(id);
-          if (!input.value.trim()) {
-            input.closest('.form-group').classList.add('has-error');
-            valid = false;
-          }
-        });
+        valid = true;
       } else if (step === 3) {
         // Crops
         if (!document.querySelectorAll('input[name="crops"]:checked').length) {
@@ -673,11 +686,23 @@
 
         let productPhotoBase64 = '';
         const hasProduct = document.querySelector('input[name="hasProductPhoto"]:checked')?.value;
+
         if (hasProduct === 'Yes' && document.getElementById('productPhoto').files.length) {
           productPhotoBase64 = await fileToBase64(document.getElementById('productPhoto').files[0]);
         }
 
-        const crops = Array.from(document.querySelectorAll('input[name="crops"]:checked')).map(c => c.value);
+        // Crops
+        const crops = Array.from(
+          document.querySelectorAll('input[name="crops"]:checked')
+        ).map(c => c.value);
+
+        // Add "Other" crop if provided
+        if (
+          document.getElementById('otherCropCheck')?.checked &&
+          document.getElementById('otherCrop').value.trim() !== ''
+        ) {
+          crops.push(document.getElementById('otherCrop').value.trim());
+        }
 
         const data = {
           farmerId: document.getElementById('farmerId').value.trim(),
@@ -687,15 +712,24 @@
           gender: document.querySelector('input[name="gender"]:checked').value,
           farmerPhoto: farmerPhotoBase64,
           mobileNo: document.getElementById('mobileNo').value.trim(),
+
           state: document.getElementById('state').value.trim(),
           village: document.getElementById('village').value.trim(),
           tahsil: document.getElementById('tahsil').value.trim(),
           district: document.getElementById('district').value.trim(),
           location: document.getElementById('location').value.trim(),
+
           cropsGrown: crops.join(', '),
+
+          // New Fields
+          otherCrop: document.getElementById('otherCrop')?.value.trim() || '',
+          bhujivanApplications: document.getElementById('bhujivanApplications')?.value || '',
+          applicationPeriod: document.getElementById('applicationPeriod')?.value.trim() || '',
+
           soilType: document.querySelector('input[name="soilType"]:checked').value,
           hasProductPhoto: hasProduct,
           productPhoto: productPhotoBase64,
+
           dateOfFirstUse: document.getElementById('dateOfFirstUse').value,
           methodOfUse: document.querySelector('input[name="methodOfUse"]:checked').value,
           vegetativeGrowth: document.querySelector('input[name="vegetativeGrowth"]:checked').value,
@@ -706,7 +740,9 @@
 
         if (result.success) {
           showToast('Registration successful! Redirecting to login…', 'success');
-          setTimeout(() => { window.location.href = 'index.html'; }, 1500);
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 1500);
         } else {
           showToast(result.message || 'Registration failed', 'error');
         }
