@@ -1,3 +1,4 @@
+
 # Farmer Management System
 
 A complete management system for farmers to register their details, track crop growth, and monitor yields, with an admin dashboard for analytics and management.
