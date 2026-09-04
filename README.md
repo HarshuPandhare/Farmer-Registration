@@ -3,6 +3,20 @@
 
 A complete management system for farmers to register their details, track crop growth, and monitor yields, with an admin dashboard for analytics and management.
 
+#  Frontend Interface
+
+![Frontend Screenshot](Screenshots/login22.png)
+
+---
+#  ADMIN PANEL
+
+
+ ![COUNT](Screenshots/admin1.png)  ![ANALYSIS](Screenshots/admin2.png) 
+
+
+
+---
+
 ## Tech Stack
 - **Frontend**: HTML5, CSS3, JavaScript (Vanilla)
 - **Backend API**: Google Apps Script
